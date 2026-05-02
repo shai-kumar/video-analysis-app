@@ -153,11 +153,7 @@ def clip_video(input_video_path, output_clip_path, timestamps, pre_padding=0.0, 
         print("Error: 'ffmpeg' is not installed or not found in PATH. Clipping skipped.")
         return
 
-    scratch_dir = "/usr/local/google/home/shaikumar/.gemini/jetski/brain/d1513985-3c85-41e6-a179-b0a78cc2ca45/scratch"
-    if not os.path.exists(scratch_dir):
-        os.makedirs(scratch_dir, exist_ok=True)
-
-    temp_dir = tempfile.mkdtemp(dir=scratch_dir)
+    temp_dir = tempfile.mkdtemp()
     print(f"Extracting {len(timestamps)} segments to temporary directory: {temp_dir}")
 
     segment_files = []
@@ -263,11 +259,7 @@ def truncate_video_to_limit(video_path, max_size_bytes=2000000000):
         except Exception as e:
             print(f"ffprobe warning: {e}")
 
-    scratch_dir = "/usr/local/google/home/shaikumar/.gemini/jetski/brain/d1513985-3c85-41e6-a179-b0a78cc2ca45/scratch"
-    if not os.path.exists(scratch_dir):
-        os.makedirs(scratch_dir, exist_ok=True)
-
-    temp_truncated = os.path.join(scratch_dir, f"truncated_{os.path.basename(video_path)}")
+    temp_truncated = os.path.join(tempfile.gettempdir(), f"truncated_{os.path.basename(video_path)}")
 
     if duration:
         # Use a safety margin to ensure the file size remains under the limit
