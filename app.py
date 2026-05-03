@@ -111,6 +111,7 @@ if st.button("Analyze & Extract", type="primary"):
                 
                 with st.spinner(f"Extracting and combining {len(timestamps)} clip(s)..."):
                     output_clip_path = tempfile.mktemp(suffix=".mp4")
+                    st.success("Created temp file.")
                     clip_video(
                         truncated_path, 
                         output_clip_path, 
