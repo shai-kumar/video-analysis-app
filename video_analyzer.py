@@ -182,8 +182,7 @@ def clip_video(input_video_path, output_clip_path, timestamps, pre_padding=0.0, 
                 "-ss", str(start_sec),
                 "-to", str(end_sec),
                 "-i", input_video_path,
-                "-c:v", "libx264",
-                "-c:a", "aac",
+                "-c", "copy",
                 temp_output
             ]
             
