@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "/Users/peacejoy/Library/Python/3.9/lib/python/site-packages"
+    ]
+}
