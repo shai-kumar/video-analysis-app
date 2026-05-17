@@ -48,6 +48,11 @@ if st.button("Analyze & Extract", type="primary"):
             tf.write(uploaded_file.read())
             temp_video_path = tf.name
 
+    truncated_path = None
+    is_truncated = False
+    output_clip_path = None
+    file_name = None
+
     try:
         with st.spinner("Checking video size..."):
             truncated_path, is_truncated = truncate_video_to_limit(temp_video_path)
@@ -65,7 +70,6 @@ if st.button("Analyze & Extract", type="primary"):
             is_active = wait_for_file_active(file_name, api_key)
             if not is_active:
                 st.error("Video processing failed or timed out.")
-                delete_file(file_name, api_key)
                 st.stop()
 
         with st.spinner("Analyzing video content..."):
@@ -82,9 +86,6 @@ if st.button("Analyze & Extract", type="primary"):
                 model_name="gemini-2.5-flash", 
                 response_schema_json=True
             )
-            
-            # Clean up from Gemini API
-            delete_file(file_name, api_key)
 
         if not response_text:
             st.error("No response received from the model.")
@@ -110,7 +111,8 @@ if st.button("Analyze & Extract", type="primary"):
                 st.json(timestamps)
                 
                 with st.spinner(f"Extracting and combining {len(timestamps)} clip(s)..."):
-                    output_clip_path = tempfile.mktemp(suffix=".mp4")
+                    with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tf:
+                        output_clip_path = tf.name
                     st.success("Created temp file.")
                     clip_video(
                         truncated_path, 
@@ -144,15 +146,19 @@ if st.button("Analyze & Extract", type="primary"):
                 st.text(response_text)
 
     finally:
+        # Clean up Gemini API file
+        if file_name:
+            delete_file(file_name, api_key)
+
         # Clean up local files
         if os.path.exists(temp_video_path):
             os.remove(temp_video_path)
-        if 'truncated_path' in locals() and is_truncated and os.path.exists(truncated_path):
+        if is_truncated and truncated_path and os.path.exists(truncated_path):
             try:
                 os.remove(truncated_path)
             except OSError:
                 pass
-        if 'output_clip_path' in locals() and os.path.exists(output_clip_path):
+        if output_clip_path and os.path.exists(output_clip_path):
             try:
                 os.remove(output_clip_path)
             except OSError:

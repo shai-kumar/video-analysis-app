@@ -5,6 +5,14 @@ import sys
 import time
 import requests
 
+def get_executable_path(cmd_name):
+    import shutil
+    path = shutil.which(cmd_name)
+    if path: return path
+    for fallback in [f"/opt/homebrew/bin/{cmd_name}", f"/usr/local/bin/{cmd_name}"]:
+        if os.path.exists(fallback): return fallback
+    return None
+
 def upload_video(file_path, api_key):
     """Uploads a video to the Gemini File API using REST."""
     print(f"Uploading {file_path} to Gemini File API...")
@@ -148,7 +156,7 @@ def clip_video(input_video_path, output_clip_path, timestamps, pre_padding=0.0, 
         print("No timestamps found to extract clips.")
         return
 
-    ffmpeg_path = shutil.which("ffmpeg")
+    ffmpeg_path = get_executable_path("ffmpeg")
     if not ffmpeg_path:
         print("Error: 'ffmpeg' is not installed or not found in PATH. Clipping skipped.")
         return
@@ -237,12 +245,12 @@ def truncate_video_to_limit(video_path, max_size_bytes=2000000000):
     print(f"Original video size ({file_size} bytes) exceeds 2GB (2000000000 bytes) limit.")
     print("Truncating the video to stay within the 2GB limit before uploading...")
 
-    ffmpeg_path = shutil.which("ffmpeg")
+    ffmpeg_path = get_executable_path("ffmpeg")
     if not ffmpeg_path:
         print("Warning: ffmpeg not found. Cannot truncate video. Uploading as is.")
         return video_path, False
 
-    ffprobe_path = shutil.which("ffprobe")
+    ffprobe_path = get_executable_path("ffprobe")
     duration = None
     if ffprobe_path:
         try:
